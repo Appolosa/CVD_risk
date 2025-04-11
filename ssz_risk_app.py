@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 
@@ -6,7 +7,6 @@ st.title("🫀 Оценка риска сердечно-сосудистых з�
 
 uploaded_file = st.file_uploader("Загрузите Excel-файл с метаболомным профилем", type=["xlsx"])
 
-# Таблица критериев оценки по маркерам
 criteria = [
     {"marker": "ADMA", "thresholds": [0.45, 0.6], "score": [0, 1, 2], "direction": ">"},
     {"marker": "TotalDMA", "thresholds": [0.45, 0.6], "score": [0, 1, 2], "direction": ">"},
@@ -41,9 +41,10 @@ def interpret_score(score):
     return "Недостаточно данных для интерпретации"
 
 if uploaded_file:
-    df = pd.read_excel(uploaded_file, index_col=0).T
-    df.reset_index(drop=True, inplace=True)
-    row = df.iloc[0]
+    df = pd.read_excel(uploaded_file, header=None)
+    headers = df.iloc[0]
+    values = df.iloc[1]
+    row = pd.Series(data=values.values, index=headers.values)
 
     total_score = 0
     report = []
@@ -51,25 +52,31 @@ if uploaded_file:
     for rule in criteria:
         marker = rule["marker"]
         if marker in row:
-            value = row[marker]
-            t1, t2 = rule["thresholds"]
-            s0, s1, s2 = rule["score"]
-            if rule["direction"] == ">":
-                score = s0 if value <= t1 else s1 if value <= t2 else s2
-            else:
-                score = s0 if value >= t2 else s1 if value >= t1 else s2
-            total_score += score
-            report.append((marker, value, score))
+            try:
+                value = float(row[marker])
+                t1, t2 = rule["thresholds"]
+                s0, s1, s2 = rule["score"]
+                if rule["direction"] == ">":
+                    score = s0 if value <= t1 else s1 if value <= t2 else s2
+                else:
+                    score = s0 if value >= t2 else s1 if value >= t1 else s2
+                total_score += score
+                report.append((marker, value, score))
+            except Exception:
+                continue
 
     max_score = len(report) * 2
-    scaled_score = round((total_score / max_score) * 10)
-    interpretation = interpret_score(scaled_score)
+    if max_score > 0:
+        scaled_score = round((total_score / max_score) * 10)
+        interpretation = interpret_score(scaled_score)
 
-    st.subheader("📊 Результаты оценки")
-    st.metric("Суммарный балл", scaled_score)
-    st.write(interpretation)
+        st.subheader("📊 Результаты оценки")
+        st.metric("Суммарный балл", scaled_score)
+        st.write(interpretation)
 
-    st.subheader("🔍 Подробности")
-    st.dataframe(pd.DataFrame(report, columns=["Показатель", "Значение", "Баллы"]))
+        st.subheader("🔍 Подробности")
+        st.dataframe(pd.DataFrame(report, columns=["Показатель", "Значение", "Баллы"]))
+    else:
+        st.error("❗️Файл не содержит необходимых маркеров. Убедитесь, что названия показателей соответствуют.")
 else:
     st.info("Пожалуйста, загрузите файл Excel с метаболомными показателями.")
