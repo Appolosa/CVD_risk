@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 
@@ -7,6 +6,7 @@ st.title("🫀 Оценка риска сердечно-сосудистых з�
 
 uploaded_file = st.file_uploader("Загрузите Excel-файл с метаболомным профилем", type=["xlsx"])
 
+# Таблица критериев оценки по маркерам
 criteria = [
     {"marker": "ADMA", "thresholds": [0.45, 0.6], "score": [0, 1, 2], "direction": ">"},
     {"marker": "TotalDMA", "thresholds": [0.45, 0.6], "score": [0, 1, 2], "direction": ">"},
@@ -62,7 +62,7 @@ if uploaded_file:
                     score = s0 if value >= t2 else s1 if value >= t1 else s2
                 total_score += score
                 report.append((marker, value, score))
-            except Exception:
+            except:
                 continue
 
     max_score = len(report) * 2
