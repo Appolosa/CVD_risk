@@ -42,8 +42,8 @@ def interpret_score(score):
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file, header=None)
-    headers = df.iloc[0]           # первая строка = названия маркеров
-    values = df.iloc[1]            # вторая строка = значения
+    headers = df.iloc[0]
+    values = df.iloc[1]
     row = pd.Series(data=values.values, index=headers.values)
 
     total_score = 0
