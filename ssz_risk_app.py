@@ -63,7 +63,7 @@ if uploaded_file:
                 total_score += score
                 report.append((marker, value, score))
             except Exception:
-                continue
+                report.append((marker, "ошибка чтения", 0))
 
     max_score = len(report) * 2
     if max_score > 0:
