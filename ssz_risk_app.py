@@ -42,8 +42,8 @@ def interpret_score(score):
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file, header=None)
-    headers = df.iloc[0]
-    values = df.iloc[1]
+    headers = df.iloc[0]           # первая строка = названия маркеров
+    values = df.iloc[1]            # вторая строка = значения
     row = pd.Series(data=values.values, index=headers.values)
 
     total_score = 0
@@ -62,7 +62,7 @@ if uploaded_file:
                     score = s0 if value >= t2 else s1 if value >= t1 else s2
                 total_score += score
                 report.append((marker, value, score))
-            except:
+            except Exception:
                 continue
 
     max_score = len(report) * 2
@@ -77,6 +77,6 @@ if uploaded_file:
         st.subheader("🔍 Подробности")
         st.dataframe(pd.DataFrame(report, columns=["Показатель", "Значение", "Баллы"]))
     else:
-        st.error("❗️Файл не содержит необходимых маркеров. Убедитесь, что названия показателей соответствуют.")
+        st.error("❗️Файл не содержит необходимых метаболитов или все значения недоступны. Проверьте формат данных.")
 else:
     st.info("Пожалуйста, загрузите файл Excel с метаболомными показателями.")
