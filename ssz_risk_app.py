@@ -66,17 +66,18 @@ if uploaded_file:
                 report.append((marker, "ошибка чтения", 0))
 
     max_score = len(report) * 2
-    if max_score > 0:
-        scaled_score = round((total_score / max_score) * 10)
-        interpretation = interpret_score(scaled_score)
+    if max_score == 0:
+        st.error("❗️Не удалось рассчитать итоговый балл — отсутствуют данные или все показатели недоступны.")
+        st.stop()
 
-        st.subheader("📊 Результаты оценки")
-        st.metric("Суммарный балл", scaled_score)
-        st.write(interpretation)
+    scaled_score = round((total_score / max_score) * 10)
+    interpretation = interpret_score(scaled_score)
 
-        st.subheader("🔍 Подробности")
-        st.dataframe(pd.DataFrame(report, columns=["Показатель", "Значение", "Баллы"]))
-    else:
-        st.error("❗️Файл не содержит необходимых метаболитов или все значения недоступны. Проверьте формат данных.")
+    st.subheader("📊 Результаты оценки")
+    st.metric("Суммарный балл", scaled_score)
+    st.write(interpretation)
+
+    st.subheader("🔍 Подробности")
+    st.dataframe(pd.DataFrame(report, columns=["Показатель", "Значение", "Баллы"]))
 else:
     st.info("Пожалуйста, загрузите файл Excel с метаболомными показателями.")
